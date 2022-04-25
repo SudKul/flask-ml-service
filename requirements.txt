@@ -4,3 +4,4 @@ scikit-learn==1.0.2
 importlib-metadata==4.11.3
 virtualenv==20.14.1
 argcomplete==2.0.0
+joblib==1.1.0
