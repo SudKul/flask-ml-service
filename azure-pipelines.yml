@@ -14,7 +14,7 @@
 trigger:
 - main
 
-pool: myPipelineAgentVM
+pool: myAgentPool
 
 steps:
 - script: echo Hello, world!
