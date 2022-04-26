@@ -1,12 +1,13 @@
-# Starter pipeline
+# Starter pipeline    
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 - task: AzureWebApp@1
   inputs:
     azureSubscription: 'UdacityDS - 03(13e7b74b-ca4b-405f-9015-8032555cec7c)'
+    azureServiceConnectionId: 'mysvcconn'
     appType: 'webAppLinux'
-    appName: 'mywebapp193422'
+    appName: 'mywebapp193576'
     package: '$(System.DefaultWorkingDirectory)/**/*.zip'
     runtimeStack: 'PYTHON|3.7'
     startUpCommand: 'python app.py'
