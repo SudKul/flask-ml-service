@@ -28,8 +28,6 @@ stages:
     pool: myAgentPool
     steps:    
     - script: |
-        python3.7 -m venv antenv
-        source antenv/bin/activate
         python3.7 -m pip install --upgrade pip
         python3.7 -m pip install setup
         python3.7 -m pip install -r requirements.txt
