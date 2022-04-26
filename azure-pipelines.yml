@@ -2,6 +2,13 @@
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
+
+trigger:
+- main
+
+pool: myAgentPool
+
+steps:
 - task: AzureWebApp@1
   inputs:
     azureSubscription: 'UdacityDS - 03(13e7b74b-ca4b-405f-9015-8032555cec7c)'
@@ -12,12 +19,6 @@
     runtimeStack: 'PYTHON|3.7'
     startUpCommand: 'python app.py'
 
-trigger:
-- main
-
-pool: myAgentPool
-
-steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
 
