@@ -2,27 +2,89 @@
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
-
 trigger:
-- main
+- master
 
-pool: myAgentPool
+variables:
+  # Azure Resource Manager connection created during pipeline creation
+  azureServiceConnectionId: 'mysvcconn'
+  
+  # Web app name
+  webAppName: 'mywebapp193576'
+  appType: 'webAppLinux'
 
-steps:
-- task: AzureWebApp@1
-  inputs:
-    azureSubscription: 'UdacityDS - 03(13e7b74b-ca4b-405f-9015-8032555cec7c)'
-    azureServiceConnectionId: 'mysvcconn'
-    appType: 'webAppLinux'
-    appName: 'mywebapp193576'
-    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
-    runtimeStack: 'PYTHON|3.7'
-    startUpCommand: 'python app.py'
+  # Environment name
+  environmentName: 'flask-ml-service'
 
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+  # Project root folder. Point to the folder containing manage.py file.
+  projectRoot: $(System.DefaultWorkingDirectory)
+  
+  # Python version: 3.7
+  pythonVersion: '3.7'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: BuildJob
+    pool: myAgentPool
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'
+      displayName: 'Use Python $(pythonVersion)'
+    
+    - script: |
+        python -m venv antenv
+        source antenv/bin/activate
+        python -m pip install --upgrade pip
+        pip install setup
+        pip install -r requirements.txt
+      workingDirectory: $(projectRoot)
+
+    - script: |
+        python -m venv antenv
+        source antenv/bin/activate
+        make install
+        make lint
+      workingDirectory: $(projectRoot)
+      displayName: 'Run lint tests'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
+      inputs:
+        rootFolderOrFile: '$(projectRoot)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+
+    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      displayName: 'Upload package'
+      artifact: drop
+
+- stage: Deploy
+  displayName: 'Deploy Web App'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeploymentJob
+    pool: myAgentPool
+    environment: $(environmentName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(pythonVersion)'
+            displayName: 'Use Python version'
+
+          - task: AzureWebApp@1
+            displayName: 'Deploy Azure Web App : flask-ml-service'
+            inputs:
+              azureSubscription: $(azureServiceConnectionId)
+              appName: $(webAppName)
+              # package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+              package: '$(System.DefaultWorkingDirectory)/**/*.zip'
