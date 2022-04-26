@@ -72,5 +72,4 @@ stages:
             inputs:
               azureSubscription: $(azureServiceConnectionId)
               appName: $(webAppName)
-              # package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-              package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
