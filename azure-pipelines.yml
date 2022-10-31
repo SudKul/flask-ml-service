@@ -5,7 +5,7 @@
 trigger:
 - master
 
-pool: myAgentPool
+pool: Default
 
 variables:
   # Azure Resource Manager connection created during pipeline creation
